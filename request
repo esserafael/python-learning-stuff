@@ -1,0 +1,7 @@
+import json
+import requests
+import urllib.parse
+
+response = requests.get("http://api.open-notify.org/this-api-doesnt-exist")
+
+print(response.url)
