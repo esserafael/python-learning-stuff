@@ -47,13 +47,13 @@ def message_display(text):
 def game_loop():
     gameExit = False
     
-    form_x = round((display_width * 0.45))
-    form_y = round((display_height * 0.8))
-    form_width = 100 
-    form_height = 100
-    form_x_change = 0
-    form_y_change = 0
-    form_move_speed = 10
+    main_form_x = round((display_width * 0.45))
+    main_form_y = round((display_height * 0.8))
+    main_form_width = 100 
+    main_form_height = 100
+    main_form_x_change = 0
+    main_form_y_change = 0
+    main_form_move_speed = 10
 
     #other_forms = []
     total_other_forms = 4
@@ -79,40 +79,40 @@ def game_loop():
                 gameExit = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                    form_x_change = -form_move_speed
+                    main_form_x_change = -main_form_move_speed
                 elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                    form_x_change = form_move_speed
+                    main_form_x_change = main_form_move_speed
                 elif event.key == pygame.K_UP or event.key == pygame.K_w:
-                    form_y_change = -form_move_speed
+                    main_form_y_change = -main_form_move_speed
                 elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
-                    form_y_change = form_move_speed
+                    main_form_y_change = main_form_move_speed
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_a or event.key == pygame.K_d:
-                    form_x_change = 0
+                    main_form_x_change = 0
                 elif event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_w or event.key == pygame.K_s:
-                    form_y_change = 0 
+                    main_form_y_change = 0 
 
         gameDisplay.fill(white)
 
-        form_x += form_x_change
-        form_y += form_y_change
+        main_form_x += main_form_x_change
+        main_form_y += main_form_y_change
 
         #"""
-        display_x_boundary = display_width - form_width
-        display_y_boundary = display_height - form_height
+        display_x_boundary = display_width - main_form_width
+        display_y_boundary = display_height - main_form_height
 
-        if form_x > display_x_boundary:
-            form_x = display_x_boundary
-        elif form_x < 0:
-            form_x = 0
+        if main_form_x > display_x_boundary:
+            main_form_x = display_x_boundary
+        elif main_form_x < 0:
+            main_form_x = 0
 
-        if form_y > display_y_boundary:
-            form_y = display_y_boundary
-        elif form_y < 0:
-            form_y = 0
+        if main_form_y > display_y_boundary:
+            main_form_y = display_y_boundary
+        elif main_form_y < 0:
+            main_form_y = 0
         #"""
 
-        main_block = draw_block(form_x, form_y, form_width, form_height, red)
+        main_block = draw_block(main_form_x, main_form_y, main_form_width, main_form_height, red)
 
         if other_forms:
             for form in other_forms:
