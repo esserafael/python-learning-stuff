@@ -93,9 +93,10 @@ def game_loop():
                         car_y_change = 0              
             #######################
 
-        
         car_x += car_x_change
         car_y += car_y_change
+
+        block_y += block_speed        
 
         if car_x > display_x_boundary:
             car_x = display_x_boundary
@@ -120,22 +121,26 @@ def game_loop():
                   explode()
         
         if crashed:
+            if car_x_change < 1 and car_x_change >= 0 or car_x_change <= 0 and car_x_change > -1:
+                car_x_change = 0
+                crashed = False
+
             car_x_change = car_x_change / 1.05
-            car_y_change = round(car_speed / 1.1) 
-            print(car_x_change)
-            print(car_y_change)
+            car_y_change = round(car_speed / 1.1)
+                
+
+        print(car_x_change)
+        print(car_speed)
+           # print(car_y_change)
 
         car(car_x,car_y)
-
-        block_y += block_speed
-        draw_block(block_x, block_y, block_width, block_height, black)        
+        draw_block(block_x, block_y, block_width, block_height, black)                
 
         #print("Blk X: {} - {}; Blk Y: {} - {}".format(block_x, (block_x + block_width), block_y, (block_y + block_height)))
 
         if block_y > display_height:
             block_y = 0 - block_height
             block_x = random.randrange(0, display_width - block_width)
-            crashed = False  
                 
         #print("Car X: {} - {}; Car Y: {} - {}".format(car_x, (car_x + car_width), car_y, (car_y + car_height)))
         #print(keys_disabled)
