@@ -49,6 +49,8 @@ def game_loop():
     
     form_x = round((display_width * 0.45))
     form_y = round((display_height * 0.8))
+    form_width = 100 
+    form_height = 100
     form_x_change = 0
     form_y_change = 0
     form_move_speed = 10
@@ -69,7 +71,7 @@ def game_loop():
             black)) 
             for form in range(total_other_forms)]
 
-    print(other_forms)
+    #print(other_forms)
 
     while not gameExit:
         for event in pygame.event.get():
@@ -87,7 +89,7 @@ def game_loop():
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_a or event.key == pygame.K_d:
                     form_x_change = 0
-                if event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_w or event.key == pygame.K_s:
+                elif event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_w or event.key == pygame.K_s:
                     form_y_change = 0 
 
         gameDisplay.fill(white)
@@ -95,7 +97,22 @@ def game_loop():
         form_x += form_x_change
         form_y += form_y_change
 
-        main_block = draw_block(form_x, form_y, 100, 100, red)
+        #"""
+        display_x_boundary = display_width - form_width
+        display_y_boundary = display_height - form_height
+
+        if form_x > display_x_boundary:
+            form_x = display_x_boundary
+        elif form_x < 0:
+            form_x = 0
+
+        if form_y > display_y_boundary:
+            form_y = display_y_boundary
+        elif form_y < 0:
+            form_y = 0
+        #"""
+
+        main_block = draw_block(form_x, form_y, form_width, form_height, red)
 
         if other_forms:
             for form in other_forms:
