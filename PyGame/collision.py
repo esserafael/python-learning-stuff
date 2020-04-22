@@ -2,7 +2,7 @@ import pygame
 import time
 import random
 
-class CreatedFormData:
+class FormData:
     def __init__(self, name: str, x: int, y: int, width: int, height: int, color: str):
         self.name = name
         self.x = x
@@ -53,14 +53,21 @@ def game_loop():
     form_y_change = 0
     form_move_speed = 10
 
-    other_forms = []
+    #other_forms = []
     total_other_forms = 4
 
-    total_forms_generated = 0
+    #total_forms_generated = 0
+    #while total_forms_generated < total_other_forms:
+    #    other_forms.append(CreatedFormData("block_{}".format(total_forms_generated), random.randrange(0, display_width - 100), random.randrange(0, display_height - 100), 100, 100, black))
+    #    total_forms_generated += 1
 
-    while total_forms_generated < total_other_forms:
-        other_forms.append(CreatedFormData("block_{}".format(total_forms_generated), random.randrange(0, display_width - 100), random.randrange(0, display_height - 100), 100, 100, black))
-        total_forms_generated += 1
+    other_forms = [
+        (FormData(
+            "block_{}".format(form), 
+            random.randrange(0, display_width - 100), 
+            random.randrange(0, display_height - 100), 100, 100, 
+            black)) 
+            for form in range(total_other_forms)]
 
     print(other_forms)
 
@@ -93,6 +100,7 @@ def game_loop():
         if other_forms:
             for form in other_forms:
                 draw_block(form.x, form.y, form.width, form.height, form.color)
+                
         
         #print(blocks_generated)
 
