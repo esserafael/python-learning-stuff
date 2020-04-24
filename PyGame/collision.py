@@ -43,7 +43,6 @@ black = (0,0,0)
 white = (255,255,255)
 red = (255,0,0)
 
-#def draw_block(block_x, block_y, block_width, block_height, color):
 def draw_block(block: FormData):
 
     def message_display(text, size, x, y):
@@ -68,28 +67,17 @@ def text_objects(text, font):
 def game_loop():
     gameExit = False
     
-    main_form_x = round((display_width * 0.45))
-    main_form_y = round((display_height * 0.8))
-    main_form_width = 100 
-    main_form_height = 100
     main_form_x_change = 0
     main_form_y_change = 0
     main_form_move_speed = 5
 
-    #other_forms = []
     total_other_forms = 4
-    other_forms_centersum = []
-
-    #total_forms_generated = 0
-    #while total_forms_generated < total_other_forms:
-    #    other_forms.append(CreatedFormData("block_{}".format(total_forms_generated), random.randrange(0, display_width - 100), random.randrange(0, display_height - 100), 100, 100, black))
-    #    total_forms_generated += 1
 
     main_block = FormData(
         "main_block", 
-        FormDataPosition(main_form_x, main_form_y), 
-        FormDataSize(main_form_width, main_form_height), 
-        FormDataPosition(round(main_form_x + main_form_width / 2), round(main_form_y + main_form_height / 2)),
+        FormDataPosition(round((display_width * 0.45)), round((display_height * 0.8))), 
+        FormDataSize(100, 100), 
+        FormDataPosition(0, 0),
         red)
 
     other_forms = [
@@ -152,14 +140,12 @@ def game_loop():
             for form in other_forms:
                 form.center = FormDataPosition(round(form.pos.x + form.size.width / 2), round(form.pos.y + form.size.height / 2))
                 form.centersum = form.center.x + form.center.y
-                #other_forms_centersum.append(form.centersum)
-                #print(form.centersum)
                 draw_block(form)
                 if (main_block.pos.x >= form.pos.x and 
                         main_block.pos.x <= form.pos.x + form.size.width -1 and 
                         main_block.pos.y >= form.pos.y and 
                         main_block.pos.y <= form.pos.y + form.size.height -1):
-                        
+
                     if main_block.posbef.x >= form.pos.x + form.size.width:
                         print("Opax")
                         main_block.pos.x = form.pos.x + form.size.width
