@@ -3,7 +3,7 @@ import time
 import random
 
 class FormData:
-    def __init__(self, name: str, x: int, y: int, width: int, height: int, color: str):
+    def __init__(self, name: str, x: int, y: int, width: int, height: int, color: tuple):
         self.name = name
         self.x = x
         self.y = y
@@ -30,17 +30,25 @@ white = (255,255,255)
 red = (255,0,0)
 
 def draw_block(block_x, block_y, block_width, block_height, color):
-    return pygame.draw.rect(gameDisplay, color, [block_x, block_y, block_width, block_height])
+
+    def message_display(text, size, x, y):
+        largeText = pygame.font.Font('freesansbold.ttf',size)
+        TextSurf, TextRect = text_objects(text, largeText)
+        TextRect.center = x,y
+        gameDisplay.blit(TextSurf, TextRect)
+
+    block = pygame.draw.rect(gameDisplay, color, [block_x, block_y, block_width, block_height])
+
+    block_center_x = round(block_x + block_width / 2)
+    block_center_y = round(block_y + block_height / 2)
+
+    message_display("x:{} y:{}".format(block_center_x, block_center_y), 12, block_center_x, block_center_y)
+
+    return block
 
 def text_objects(text, font):
     textSurface = font.render(text, True, black)
     return textSurface, textSurface.get_rect()
-
-def message_display(text):
-    largeText = pygame.font.Font('freesansbold.ttf',50)
-    TextSurf, TextRect = text_objects(text, largeText)
-    TextRect.center = (round(display_width/2),round(display_height/2))
-    gameDisplay.blit(TextSurf, TextRect)
 
     pygame.display.update()
 
@@ -67,8 +75,12 @@ def game_loop():
         (FormData(
             "block_{}".format(form), 
             random.randrange(0, display_width - 100), 
-            random.randrange(0, display_height - 100), 100, 100, 
-            black)) 
+            random.randrange(0, display_height - 100), 
+            100, 
+            100, 
+            (
+                random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)
+            ))) 
             for form in range(total_other_forms)]
 
     #print(other_forms)
