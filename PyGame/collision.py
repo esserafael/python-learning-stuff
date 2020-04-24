@@ -2,14 +2,26 @@ import pygame
 import time
 import random
 
-class FormData:
-    def __init__(self, name: str, x: int, y: int, width: int, height: int, color: tuple):
-        self.name = name
+class FormDataPosition:
+    def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
+
+
+class FormDataSize:
+    def __init__(self, width: int, height: int):
         self.width = width
         self.height = height
+
+
+class FormData:
+    def __init__(self, name: str, pos: FormDataPosition, size: FormDataSize, center: FormDataPosition, color: tuple):
+        self.name = name
+        self.pos = pos
+        self.size = size
+        self.center = center
         self.color = color
+           
 
 pygame.init()
 
@@ -29,7 +41,8 @@ black = (0,0,0)
 white = (255,255,255)
 red = (255,0,0)
 
-def draw_block(block_x, block_y, block_width, block_height, color):
+#def draw_block(block_x, block_y, block_width, block_height, color):
+def draw_block(block: FormData):
 
     def message_display(text, size, x, y):
         largeText = pygame.font.Font('freesansbold.ttf',size)
@@ -37,14 +50,11 @@ def draw_block(block_x, block_y, block_width, block_height, color):
         TextRect.center = x,y
         gameDisplay.blit(TextSurf, TextRect)
 
-    block = pygame.draw.rect(gameDisplay, color, [block_x, block_y, block_width, block_height])
+    block_draw = pygame.draw.rect(gameDisplay, block.color, [block.pos.x, block.pos.y, block.size.width, block.size.height])
 
-    block_center_x = round(block_x + block_width / 2)
-    block_center_y = round(block_y + block_height / 2)
+    message_display("x:{} y:{}".format(block.center.x, block.center.y), 12,block.center.x, block.center.y)
 
-    message_display("x:{} y:{}".format(block_center_x, block_center_y), 12, block_center_x, block_center_y)
-
-    return block
+    return block_draw
 
 def text_objects(text, font):
     textSurface = font.render(text, True, black)
@@ -73,14 +83,12 @@ def game_loop():
 
     other_forms = [
         (FormData(
-            "block_{}".format(form), 
-            random.randrange(0, display_width - 100), 
-            random.randrange(0, display_height - 100), 
-            100, 
-            100, 
-            (
-                random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)
-            ))) 
+            "block_{}".format(form),
+            FormDataPosition(random.randrange(0, display_width - 100), random.randrange(0, display_height - 100)),
+            FormDataSize(100, 100),
+            FormDataPosition(0, 0),
+            (random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255))
+            )) 
             for form in range(total_other_forms)]
 
     #print(other_forms)
@@ -124,12 +132,19 @@ def game_loop():
             main_form_y = 0
         #"""
 
-        main_block = draw_block(main_form_x, main_form_y, main_form_width, main_form_height, red)
-
         if other_forms:
             for form in other_forms:
-                draw_block(form.x, form.y, form.width, form.height, form.color)
-                
+                form.center = FormDataPosition(round(form.pos.x + form.size.width / 2), round(form.pos.y + form.size.height / 2))
+                draw_block(form)
+
+        main_block = draw_block(
+            FormData(
+                "main_block", 
+                FormDataPosition(main_form_x, main_form_y), 
+                FormDataSize(main_form_width, main_form_height), 
+                FormDataPosition(round(main_form_x + main_form_width / 2), round(main_form_y + main_form_height / 2)),
+                red
+                ))
         
         #print(blocks_generated)
 
