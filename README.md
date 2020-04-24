@@ -1,2 +1,2 @@
 # PythonStuff
-Learning Python.
+Learning Python and stuff in general.
