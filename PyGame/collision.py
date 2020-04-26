@@ -22,10 +22,12 @@ class FormData:
         self.name = name
         self.pos = pos
         self.posbef = FormDataPosition(pos.x, pos.y)
+        self.poschange = FormDataPosition(0, 0)
         self.size = size
         self.center = pos.x + size.width / 2, pos.y + size.height / 2
         self.color = color
         self.centersum = center.x + center.y
+        self.is_free_falling = True
            
 
 pygame.init()
@@ -67,9 +69,6 @@ def game_loop():
     
     main_form_x_change = 0
     main_form_y_change = 0
-
-    accel_px = 0
-    is_free_falling = True
 
     total_other_forms = 4
 
@@ -116,7 +115,7 @@ def game_loop():
 
         gameDisplay.fill(white)
 
-        if CONFIG.GRAVITY_ON and is_free_falling:
+        if CONFIG.GRAVITY_ON and main_block.is_free_falling:
             main_form_y_change += CONFIG.GRAVITY_ACCEL / CONFIG.CLOCK_TICKS
 
         main_block.posbef = main_block.pos
@@ -145,6 +144,9 @@ def game_loop():
             for form in other_forms:
                 form.center = FormDataPosition(round(form.pos.x + form.size.width / 2), round(form.pos.y + form.size.height / 2))
                 form.centersum = form.center.x + form.center.y
+
+                if CONFIG.GRAVITY_ON and form.is_free_falling:
+                    main_form_y_change += CONFIG.GRAVITY_ACCEL / CONFIG.CLOCK_TICKS
                 
                 # southeast
                 if (main_block.pos.x >= form.pos.x and 
@@ -179,13 +181,11 @@ def game_loop():
                     main_block.pos.y + main_block.size.height >= form.pos.y +1 and 
                     main_block.pos.y <= form.pos.y):
 
-                    print("Opa")
-
                     if main_block.posbef.x >= form.pos.x + form.size.width:
-                        print("Opax")
+                        #print("Opax")
                         main_block.pos.x = form.pos.x + form.size.width
                     elif main_block.posbef.y + main_block.size.height <= form.pos.y + main_form_y_change + 1:
-                        print("Opay")
+                        #print("Opay")
                         main_block.pos.y = form.pos.y - main_block.size.height
                         is_free_falling = False
                     
@@ -195,13 +195,11 @@ def game_loop():
                     main_block.pos.y + main_block.size.height >= form.pos.y +1 and 
                     main_block.pos.y <= form.pos.y):
 
-                    print("Opa")
-
                     if main_block.posbef.x + main_block.size.width <= form.pos.x:
-                        print("Opax")
+                        #print("Opax")
                         main_block.pos.x = form.pos.x - form.size.width
                     elif main_block.posbef.y + main_block.size.height <= form.pos.y + main_form_y_change + 1:
-                        print("Opay")
+                        #print("Opay")
                         main_block.pos.y = form.pos.y - main_block.size.height
                         is_free_falling = False
 
