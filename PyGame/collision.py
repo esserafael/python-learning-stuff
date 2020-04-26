@@ -46,8 +46,8 @@ red = (255,0,0)
 def draw_block(block: FormData):
 
     def message_display(text, size, x, y):
-        largeText = pygame.font.Font('freesansbold.ttf',size)
-        TextSurf, TextRect = text_objects(text, largeText)
+        fontText = pygame.font.Font('freesansbold.ttf',size)
+        TextSurf, TextRect = text_objects(text, fontText)
         TextRect.center = x,y
         gameDisplay.blit(TextSurf, TextRect)
 
@@ -56,19 +56,88 @@ def draw_block(block: FormData):
     message_display(block.name, 12, block.center.x, block.center.y - 15)
     message_display("x:{} y:{}".format(block.center.x, block.center.y), 12, block.center.x, block.center.y)
 
-    return
+def detect_border_collision(block: FormData):
+
+    display_x_boundary = CONFIG.DISPLAY_WIDTH - block.size.width
+    display_y_boundary = CONFIG.DISPLAY_HEIGHT - block.size.height
+
+    if block.pos.x > display_x_boundary:
+        block.pos.x = display_x_boundary
+    elif block.pos.x < 0:
+        block.pos.x = 0
+
+    if block.pos.y > display_y_boundary:            
+        block.pos.y = display_y_boundary
+        block.is_free_falling = False
+    elif block.pos.y < 0:
+        block.pos.y = 0
+
+    return block
+
+def detect_collision(block: FormData, otherblock: FormData):
+    # southeast
+    if (block.pos.x >= otherblock.pos.x and 
+        block.pos.x <= otherblock.pos.x + otherblock.size.width -1 and 
+        block.pos.y >= otherblock.pos.y and 
+        block.pos.y <= otherblock.pos.y + otherblock.size.height -1):
+
+        if block.posbef.x >= otherblock.pos.x + otherblock.size.width:
+            #print("Opax")
+            block.pos.x = otherblock.pos.x + otherblock.size.width
+        elif block.posbef.y >= otherblock.pos.y + otherblock.size.height:
+            #print("Opay")
+            block.pos.y = otherblock.pos.y + otherblock.size.height
+    
+    # southwest
+    if (block.pos.x <= otherblock.pos.x and 
+        block.pos.x + block.size.width >= otherblock.pos.x +1 and 
+        block.pos.y >= otherblock.pos.y and 
+        block.pos.y <= otherblock.pos.y + otherblock.size.height -1):
+
+        if block.posbef.x + block.size.width <= otherblock.pos.x:
+            #print("Opax")
+            block.pos.x = otherblock.pos.x - otherblock.size.width
+        elif block.posbef.y >= otherblock.pos.y + otherblock.size.height:
+            #print("Opay")
+            block.pos.y = otherblock.pos.y + otherblock.size.height
+
+    
+    # northeast
+    if (block.pos.x >= otherblock.pos.x and 
+        block.pos.x <= otherblock.pos.x + otherblock.size.width -1 and 
+        block.pos.y + block.size.height >= otherblock.pos.y +1 and 
+        block.pos.y <= otherblock.pos.y):
+
+        if block.posbef.x >= otherblock.pos.x + otherblock.size.width:
+            #print("Opax")
+            block.pos.x = otherblock.pos.x + otherblock.size.width
+        elif block.posbef.y + block.size.height <= otherblock.pos.y + block.poschange.y + 1:
+            #print("Opay")
+            block.pos.y = otherblock.pos.y - block.size.height
+            block.is_free_falling = False
+        
+    # northwest
+    if (block.pos.x <= otherblock.pos.x and 
+        block.pos.x + block.size.width >= otherblock.pos.x +1 and 
+        block.pos.y + block.size.height >= otherblock.pos.y +1 and 
+        block.pos.y <= otherblock.pos.y):
+
+        if block.posbef.x + block.size.width <= otherblock.pos.x:
+            #print("Opax")
+            block.pos.x = otherblock.pos.x - otherblock.size.width
+        elif block.posbef.y + block.size.height <= otherblock.pos.y + block.poschange.y + 1:
+            #print("Opay")
+            block.pos.y = otherblock.pos.y - block.size.height
+            block.is_free_falling = False
+
+    return block
 
 def text_objects(text, font):
     textSurface = font.render(text, True, black)
     return textSurface, textSurface.get_rect()
 
-    pygame.display.update()
-
 def game_loop():
     gameExit = False
-    
-    main_form_x_change = 0
-    main_form_y_change = 0
 
     total_other_forms = 4
 
@@ -97,31 +166,35 @@ def game_loop():
                 gameExit = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                    main_form_x_change = -CONFIG.MOVE_SPEED
+                    main_block.poschange.x = -CONFIG.MOVE_SPEED
                 elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                    main_form_x_change = CONFIG.MOVE_SPEED
+                    main_block.poschange.x = CONFIG.MOVE_SPEED
                 elif event.key == pygame.K_UP or event.key == pygame.K_w:
-                    main_form_y_change = -CONFIG.MOVE_SPEED
+                    main_block.poschange.y = -CONFIG.MOVE_SPEED
                 elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
-                    main_form_y_change = CONFIG.MOVE_SPEED
+                    main_block.poschange.y = CONFIG.MOVE_SPEED
             if event.type == pygame.KEYUP:
-                is_free_falling = True
+                main_block.is_free_falling = True
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_a or event.key == pygame.K_d:
-                    main_form_x_change = 0
+                    main_block.poschange.x = 0
                 elif event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_w or event.key == pygame.K_s:
-                    main_form_y_change = 0
+                    main_block.poschange.y = 0
 
         #print(event)
 
         gameDisplay.fill(white)
 
+        print(main_block.is_free_falling)
+
         if CONFIG.GRAVITY_ON and main_block.is_free_falling:
-            main_form_y_change += CONFIG.GRAVITY_ACCEL / CONFIG.CLOCK_TICKS
+            main_block.poschange.y += CONFIG.GRAVITY_ACCEL / CONFIG.CLOCK_TICKS
 
         main_block.posbef = main_block.pos
-        main_block.pos = FormDataPosition(main_block.pos.x + main_form_x_change, main_block.pos.y + main_form_y_change)
+        main_block.pos = FormDataPosition(main_block.pos.x + main_block.poschange.x, main_block.pos.y + main_block.poschange.y)
 
-        #"""
+        main_block = detect_border_collision(main_block)
+
+        """
         display_x_boundary = CONFIG.DISPLAY_WIDTH - main_block.size.width
         display_y_boundary = CONFIG.DISPLAY_HEIGHT - main_block.size.height
 
@@ -132,10 +205,10 @@ def game_loop():
 
         if main_block.pos.y > display_y_boundary:            
             main_block.pos.y = display_y_boundary
-            is_free_falling = False
+            main_block.is_free_falling = False
         elif main_block.pos.y < 0:
             main_block.pos.y = 0
-        #"""
+        """
 
         main_block.center = FormDataPosition(round(main_block.pos.x + main_block.size.width / 2), round(main_block.pos.y + main_block.size.height / 2))
         main_block.centersum = main_block.center.x + main_block.center.y
@@ -146,8 +219,14 @@ def game_loop():
                 form.centersum = form.center.x + form.center.y
 
                 if CONFIG.GRAVITY_ON and form.is_free_falling:
-                    main_form_y_change += CONFIG.GRAVITY_ACCEL / CONFIG.CLOCK_TICKS
+                    form.poschange.y += CONFIG.GRAVITY_ACCEL / CONFIG.CLOCK_TICKS
                 
+                form.pos.y += form.poschange.y
+
+                form = detect_border_collision(form)
+                main_block = detect_collision(main_block, form)
+
+                """
                 # southeast
                 if (main_block.pos.x >= form.pos.x and 
                     main_block.pos.x <= form.pos.x + form.size.width -1 and 
@@ -184,10 +263,10 @@ def game_loop():
                     if main_block.posbef.x >= form.pos.x + form.size.width:
                         #print("Opax")
                         main_block.pos.x = form.pos.x + form.size.width
-                    elif main_block.posbef.y + main_block.size.height <= form.pos.y + main_form_y_change + 1:
+                    elif main_block.posbef.y + main_block.size.height <= form.pos.y + main_block.poschange.y + 1:
                         #print("Opay")
                         main_block.pos.y = form.pos.y - main_block.size.height
-                        is_free_falling = False
+                        main_block.is_free_falling = False
                     
                 # northwest
                 if (main_block.pos.x <= form.pos.x and 
@@ -198,10 +277,11 @@ def game_loop():
                     if main_block.posbef.x + main_block.size.width <= form.pos.x:
                         #print("Opax")
                         main_block.pos.x = form.pos.x - form.size.width
-                    elif main_block.posbef.y + main_block.size.height <= form.pos.y + main_form_y_change + 1:
+                    elif main_block.posbef.y + main_block.size.height <= form.pos.y + main_block.poschange.y + 1:
                         #print("Opay")
                         main_block.pos.y = form.pos.y - main_block.size.height
-                        is_free_falling = False
+                        main_block.is_free_falling = False
+                """
 
                 draw_block(form)
 
