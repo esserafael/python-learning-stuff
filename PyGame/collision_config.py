@@ -14,11 +14,16 @@ class DefaultConfig:
     GRAVITY_ON = True
     GRAVITY_ACCEL = 9.8
 
+    # If True and with many forms will lag like hell.
+    SHOW_INFO_TEXT = False
+
     """Main Object/Form"""
 
     MOVE_SPEED = 10
 
     """Forms"""
+
+    TOTAL_OTHER_FORMS = 64
 
     SIZE_WIDTH = 100
     SIZE_HEIGHT = 100

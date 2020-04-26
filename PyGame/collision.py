@@ -44,6 +44,10 @@ white = (255,255,255)
 red = (255,0,0)
 
 def draw_block(block: FormData):
+    
+    def text_objects(text, font):
+        textSurface = font.render(text, True, black)
+        return textSurface, textSurface.get_rect()
 
     def message_display(text, size, x, y):
         fontText = pygame.font.Font('freesansbold.ttf',size)
@@ -53,8 +57,9 @@ def draw_block(block: FormData):
 
     pygame.draw.rect(gameDisplay, block.color, [block.pos.x, block.pos.y, block.size.width, block.size.height])
 
-    message_display(block.name, 12, block.center.x, block.center.y - 15)
-    message_display("x:{} y:{}".format(block.center.x, block.center.y), 12, block.center.x, block.center.y)
+    if CONFIG.SHOW_INFO_TEXT:
+        message_display(block.name, 12, block.center.x, block.center.y - 15)
+        message_display("x:{} y:{}".format(block.center.x, block.center.y), 12, block.center.x, block.center.y)
 
 def detect_border_collision(block: FormData):
 
@@ -131,15 +136,10 @@ def detect_collision(block: FormData, otherblock: FormData):
             block.is_free_falling = False
 
     return block
-
-def text_objects(text, font):
-    textSurface = font.render(text, True, black)
-    return textSurface, textSurface.get_rect()
+    
 
 def game_loop():
     gameExit = False
-
-    total_other_forms = 4
 
     main_block = FormData(
         "main_block", 
@@ -156,8 +156,7 @@ def game_loop():
             FormDataPosition(0, 0),
             (random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255))
             )) 
-            for form in range(total_other_forms)]
-
+            for form in range(CONFIG.TOTAL_OTHER_FORMS)]
   
 
     while not gameExit:
@@ -181,14 +180,12 @@ def game_loop():
                     main_block.poschange.y = 0
 
         #print(event)
-
-        gameDisplay.fill(white)
-
-        print(main_block.is_free_falling)
+        
+        gameDisplay.fill(white)        
 
         if CONFIG.GRAVITY_ON and main_block.is_free_falling:
             main_block.poschange.y += CONFIG.GRAVITY_ACCEL / CONFIG.CLOCK_TICKS
-
+            
         main_block.posbef = main_block.pos
         main_block.pos = FormDataPosition(main_block.pos.x + main_block.poschange.x, main_block.pos.y + main_block.poschange.y)
 
@@ -212,13 +209,13 @@ def game_loop():
                 
                 draw_block(form)
 
-        
-        print("--")
         draw_block(main_block)
-
-        pygame.display.update()
-        clock.tick(CONFIG.CLOCK_TICKS)
         
+        pygame.display.update()        
+        clock.tick(CONFIG.CLOCK_TICKS)
+
+        print(clock.get_rawtime()) 
+        print("--")        
 
 game_loop()
 pygame.quit()
