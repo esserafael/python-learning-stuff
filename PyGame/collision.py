@@ -138,29 +138,61 @@ def game_loop():
                 form.center = FormDataPosition(round(form.pos.x + form.size.width / 2), round(form.pos.y + form.size.height / 2))
                 form.centersum = form.center.x + form.center.y
                 draw_block(form)
+                # southeast
                 if (main_block.pos.x >= form.pos.x and 
-                        main_block.pos.x <= form.pos.x + form.size.width -1 and 
-                        main_block.pos.y >= form.pos.y and 
-                        main_block.pos.y <= form.pos.y + form.size.height -1):
+                    main_block.pos.x <= form.pos.x + form.size.width -1 and 
+                    main_block.pos.y >= form.pos.y and 
+                    main_block.pos.y <= form.pos.y + form.size.height -1):
 
                     if main_block.posbef.x >= form.pos.x + form.size.width:
-                        print("Opax")
+                        #print("Opax")
                         main_block.pos.x = form.pos.x + form.size.width
                     elif main_block.posbef.y >= form.pos.y + form.size.height:
-                        print("Opay")
+                        #print("Opay")
                         main_block.pos.y = form.pos.y + form.size.height
                 
+                # southwest
                 if (main_block.pos.x <= form.pos.x and 
-                        main_block.pos.x + main_block.size.width >= form.pos.x and 
-                        main_block.pos.y <= form.pos.y and 
-                        main_block.pos.y + main_block.size.height >= form.pos.y):
+                    main_block.pos.x + main_block.size.width >= form.pos.x +1 and 
+                    main_block.pos.y >= form.pos.y and 
+                    main_block.pos.y <= form.pos.y + form.size.height -1):
+
                     if main_block.posbef.x + main_block.size.width <= form.pos.x:
-                        
-                        main_block.pos.x = form.pos.x - main_block.size.width
-                    if main_block.posbef.y + main_block.size.height >= form.pos.y:
-                        
+                        #print("Opax")
+                        main_block.pos.x = form.pos.x - form.size.width
+                    elif main_block.posbef.y >= form.pos.y + form.size.height:
+                        #print("Opay")
+                        main_block.pos.y = form.pos.y + form.size.height
+
+                
+                # northeast
+                if (main_block.pos.x >= form.pos.x and 
+                    main_block.pos.x <= form.pos.x + form.size.width -1 and 
+                    main_block.pos.y + main_block.size.height >= form.pos.y +1 and 
+                    main_block.pos.y <= form.pos.y):
+
+                    print(main_block.pos.y)
+                    print(form.pos.y +1)
+
+                    if main_block.posbef.x >= form.pos.x + form.size.width:
+                        #print("Opax")
+                        main_block.pos.x = form.pos.x + form.size.width
+                    elif main_block.posbef.y + main_block.size.height <= form.pos.y:
+                        #print("Opay")
                         main_block.pos.y = form.pos.y - main_block.size.height
                     
+                # northwest
+                if (main_block.pos.x <= form.pos.x and 
+                    main_block.pos.x + main_block.size.width >= form.pos.x +1 and 
+                    main_block.pos.y + main_block.size.height >= form.pos.y +1 and 
+                    main_block.pos.y <= form.pos.y):
+
+                    if main_block.posbef.x + main_block.size.width <= form.pos.x:
+                        #print("Opax")
+                        main_block.pos.x = form.pos.x - form.size.width
+                    elif main_block.posbef.y + main_block.size.height <= form.pos.y:
+                        #print("Opay")
+                        main_block.pos.y = form.pos.y - main_block.size.height
 
         
         print("--")
