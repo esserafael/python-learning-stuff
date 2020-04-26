@@ -68,11 +68,14 @@ def game_loop():
     main_form_x_change = 0
     main_form_y_change = 0
 
+    accel_px = 0
+    is_free_falling = True
+
     total_other_forms = 4
 
     main_block = FormData(
         "main_block", 
-        FormDataPosition(round((CONFIG.DISPLAY_WIDTH * 0.45)), round((CONFIG.DISPLAY_HEIGHT * 0.8))), 
+        FormDataPosition(round((CONFIG.DISPLAY_WIDTH * 0.45)), round((CONFIG.DISPLAY_HEIGHT * 0.1))), 
         FormDataSize(CONFIG.SIZE_WIDTH, CONFIG.SIZE_HEIGHT), 
         FormDataPosition(0, 0),
         red)
@@ -103,6 +106,7 @@ def game_loop():
                 elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                     main_form_y_change = CONFIG.MOVE_SPEED
             if event.type == pygame.KEYUP:
+                is_free_falling = True
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_a or event.key == pygame.K_d:
                     main_form_x_change = 0
                 elif event.key == pygame.K_UP or event.key == pygame.K_DOWN or event.key == pygame.K_w or event.key == pygame.K_s:
@@ -111,6 +115,9 @@ def game_loop():
         #print(event)
 
         gameDisplay.fill(white)
+
+        if CONFIG.GRAVITY_ON and is_free_falling:
+            main_form_y_change += CONFIG.GRAVITY_ACCEL / CONFIG.CLOCK_TICKS
 
         main_block.posbef = main_block.pos
         main_block.pos = FormDataPosition(main_block.pos.x + main_form_x_change, main_block.pos.y + main_form_y_change)
@@ -124,8 +131,9 @@ def game_loop():
         elif main_block.pos.x < 0:
             main_block.pos.x = 0
 
-        if main_block.pos.y > display_y_boundary:
+        if main_block.pos.y > display_y_boundary:            
             main_block.pos.y = display_y_boundary
+            is_free_falling = False
         elif main_block.pos.y < 0:
             main_block.pos.y = 0
         #"""
@@ -137,7 +145,7 @@ def game_loop():
             for form in other_forms:
                 form.center = FormDataPosition(round(form.pos.x + form.size.width / 2), round(form.pos.y + form.size.height / 2))
                 form.centersum = form.center.x + form.center.y
-                draw_block(form)
+                
                 # southeast
                 if (main_block.pos.x >= form.pos.x and 
                     main_block.pos.x <= form.pos.x + form.size.width -1 and 
@@ -171,15 +179,15 @@ def game_loop():
                     main_block.pos.y + main_block.size.height >= form.pos.y +1 and 
                     main_block.pos.y <= form.pos.y):
 
-                    print(main_block.pos.y)
-                    print(form.pos.y +1)
+                    print("Opa")
 
                     if main_block.posbef.x >= form.pos.x + form.size.width:
-                        #print("Opax")
+                        print("Opax")
                         main_block.pos.x = form.pos.x + form.size.width
-                    elif main_block.posbef.y + main_block.size.height <= form.pos.y:
-                        #print("Opay")
+                    elif main_block.posbef.y + main_block.size.height <= form.pos.y + main_form_y_change + 1:
+                        print("Opay")
                         main_block.pos.y = form.pos.y - main_block.size.height
+                        is_free_falling = False
                     
                 # northwest
                 if (main_block.pos.x <= form.pos.x and 
@@ -187,12 +195,17 @@ def game_loop():
                     main_block.pos.y + main_block.size.height >= form.pos.y +1 and 
                     main_block.pos.y <= form.pos.y):
 
+                    print("Opa")
+
                     if main_block.posbef.x + main_block.size.width <= form.pos.x:
-                        #print("Opax")
+                        print("Opax")
                         main_block.pos.x = form.pos.x - form.size.width
-                    elif main_block.posbef.y + main_block.size.height <= form.pos.y:
-                        #print("Opay")
+                    elif main_block.posbef.y + main_block.size.height <= form.pos.y + main_form_y_change + 1:
+                        print("Opay")
                         main_block.pos.y = form.pos.y - main_block.size.height
+                        is_free_falling = False
+
+                draw_block(form)
 
         
         print("--")

@@ -9,9 +9,14 @@ class DefaultConfig:
 
     CLOCK_TICKS = 60
 
+    """General Enviroment"""
+
+    GRAVITY_ON = True
+    GRAVITY_ACCEL = 9.8
+
     """Main Object/Form"""
 
-    MOVE_SPEED = 5
+    MOVE_SPEED = 10
 
     """Forms"""
 
