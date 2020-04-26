@@ -194,22 +194,6 @@ def game_loop():
 
         main_block = detect_border_collision(main_block)
 
-        """
-        display_x_boundary = CONFIG.DISPLAY_WIDTH - main_block.size.width
-        display_y_boundary = CONFIG.DISPLAY_HEIGHT - main_block.size.height
-
-        if main_block.pos.x > display_x_boundary:
-            main_block.pos.x = display_x_boundary
-        elif main_block.pos.x < 0:
-            main_block.pos.x = 0
-
-        if main_block.pos.y > display_y_boundary:            
-            main_block.pos.y = display_y_boundary
-            main_block.is_free_falling = False
-        elif main_block.pos.y < 0:
-            main_block.pos.y = 0
-        """
-
         main_block.center = FormDataPosition(round(main_block.pos.x + main_block.size.width / 2), round(main_block.pos.y + main_block.size.height / 2))
         main_block.centersum = main_block.center.x + main_block.center.y
 
@@ -225,64 +209,7 @@ def game_loop():
 
                 form = detect_border_collision(form)
                 main_block = detect_collision(main_block, form)
-
-                """
-                # southeast
-                if (main_block.pos.x >= form.pos.x and 
-                    main_block.pos.x <= form.pos.x + form.size.width -1 and 
-                    main_block.pos.y >= form.pos.y and 
-                    main_block.pos.y <= form.pos.y + form.size.height -1):
-
-                    if main_block.posbef.x >= form.pos.x + form.size.width:
-                        #print("Opax")
-                        main_block.pos.x = form.pos.x + form.size.width
-                    elif main_block.posbef.y >= form.pos.y + form.size.height:
-                        #print("Opay")
-                        main_block.pos.y = form.pos.y + form.size.height
                 
-                # southwest
-                if (main_block.pos.x <= form.pos.x and 
-                    main_block.pos.x + main_block.size.width >= form.pos.x +1 and 
-                    main_block.pos.y >= form.pos.y and 
-                    main_block.pos.y <= form.pos.y + form.size.height -1):
-
-                    if main_block.posbef.x + main_block.size.width <= form.pos.x:
-                        #print("Opax")
-                        main_block.pos.x = form.pos.x - form.size.width
-                    elif main_block.posbef.y >= form.pos.y + form.size.height:
-                        #print("Opay")
-                        main_block.pos.y = form.pos.y + form.size.height
-
-                
-                # northeast
-                if (main_block.pos.x >= form.pos.x and 
-                    main_block.pos.x <= form.pos.x + form.size.width -1 and 
-                    main_block.pos.y + main_block.size.height >= form.pos.y +1 and 
-                    main_block.pos.y <= form.pos.y):
-
-                    if main_block.posbef.x >= form.pos.x + form.size.width:
-                        #print("Opax")
-                        main_block.pos.x = form.pos.x + form.size.width
-                    elif main_block.posbef.y + main_block.size.height <= form.pos.y + main_block.poschange.y + 1:
-                        #print("Opay")
-                        main_block.pos.y = form.pos.y - main_block.size.height
-                        main_block.is_free_falling = False
-                    
-                # northwest
-                if (main_block.pos.x <= form.pos.x and 
-                    main_block.pos.x + main_block.size.width >= form.pos.x +1 and 
-                    main_block.pos.y + main_block.size.height >= form.pos.y +1 and 
-                    main_block.pos.y <= form.pos.y):
-
-                    if main_block.posbef.x + main_block.size.width <= form.pos.x:
-                        #print("Opax")
-                        main_block.pos.x = form.pos.x - form.size.width
-                    elif main_block.posbef.y + main_block.size.height <= form.pos.y + main_block.poschange.y + 1:
-                        #print("Opay")
-                        main_block.pos.y = form.pos.y - main_block.size.height
-                        main_block.is_free_falling = False
-                """
-
                 draw_block(form)
 
         
