@@ -54,10 +54,8 @@ class FormData:
                 self.pos.y <= otherform.pos.y + otherform.size.height -1):
 
                 if self.posbef.x >= otherform.pos.x + otherform.size.width:
-                    #print("Opax")
                     self.pos.x = otherform.pos.x + otherform.size.width
                 elif self.posbef.y >= otherform.pos.y + otherform.size.height:
-                    #print("Opay")
                     self.pos.y = otherform.pos.y + otherform.size.height
             
             # southwest
@@ -67,10 +65,8 @@ class FormData:
                 self.pos.y <= otherform.pos.y + otherform.size.height -1):
 
                 if self.posbef.x + self.size.width <= otherform.pos.x:
-                    #print("Opax")
                     self.pos.x = otherform.pos.x - otherform.size.width
                 elif self.posbef.y >= otherform.pos.y + otherform.size.height:
-                    #print("Opay")
                     self.pos.y = otherform.pos.y + otherform.size.height
 
             
@@ -81,10 +77,8 @@ class FormData:
                 self.pos.y <= otherform.pos.y):
 
                 if self.posbef.x >= otherform.pos.x + otherform.size.width:
-                    #print("Opax")
                     self.pos.x = otherform.pos.x + otherform.size.width
                 elif self.posbef.y + self.size.height <= otherform.pos.y + self.poschange.y + 1:
-                    #print("Opay")
                     self.pos.y = otherform.pos.y - self.size.height
                     self.is_free_falling = False
                 
@@ -95,10 +89,8 @@ class FormData:
                 self.pos.y <= otherform.pos.y):
 
                 if self.posbef.x + self.size.width <= otherform.pos.x:
-                    #print("Opax")
                     self.pos.x = otherform.pos.x - otherform.size.width
                 elif self.posbef.y + self.size.height <= otherform.pos.y + self.poschange.y + 1:
-                    #print("Opay")
                     self.pos.y = otherform.pos.y - self.size.height
                     self.is_free_falling = False
            
