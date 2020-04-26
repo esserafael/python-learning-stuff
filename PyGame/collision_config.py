@@ -23,7 +23,7 @@ class DefaultConfig:
 
     """Forms"""
 
-    TOTAL_OTHER_FORMS = 64
+    TOTAL_OTHER_FORMS = 4
 
     SIZE_WIDTH = 100
     SIZE_HEIGHT = 100

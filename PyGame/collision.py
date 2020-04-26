@@ -28,6 +28,79 @@ class FormData:
         self.color = color
         self.centersum = center.x + center.y
         self.is_free_falling = True
+    
+    def detect_collision(self, otherform=False):
+        # Border
+        display_x_boundary = CONFIG.DISPLAY_WIDTH - self.size.width
+        display_y_boundary = CONFIG.DISPLAY_HEIGHT - self.size.height
+
+        if self.pos.x > display_x_boundary:
+            self.pos.x = display_x_boundary
+        elif self.pos.x < 0:
+            self.pos.x = 0
+
+        if self.pos.y > display_y_boundary:            
+            self.pos.y = display_y_boundary
+            self.is_free_falling = False
+        elif self.pos.y < 0:
+            self.pos.y = 0
+
+        if otherform:
+            # With other form
+            # southeast
+            if (self.pos.x >= otherform.pos.x and 
+                self.pos.x <= otherform.pos.x + otherform.size.width -1 and 
+                self.pos.y >= otherform.pos.y and 
+                self.pos.y <= otherform.pos.y + otherform.size.height -1):
+
+                if self.posbef.x >= otherform.pos.x + otherform.size.width:
+                    #print("Opax")
+                    self.pos.x = otherform.pos.x + otherform.size.width
+                elif self.posbef.y >= otherform.pos.y + otherform.size.height:
+                    #print("Opay")
+                    self.pos.y = otherform.pos.y + otherform.size.height
+            
+            # southwest
+            if (self.pos.x <= otherform.pos.x and 
+                self.pos.x + self.size.width >= otherform.pos.x +1 and 
+                self.pos.y >= otherform.pos.y and 
+                self.pos.y <= otherform.pos.y + otherform.size.height -1):
+
+                if self.posbef.x + self.size.width <= otherform.pos.x:
+                    #print("Opax")
+                    self.pos.x = otherform.pos.x - otherform.size.width
+                elif self.posbef.y >= otherform.pos.y + otherform.size.height:
+                    #print("Opay")
+                    self.pos.y = otherform.pos.y + otherform.size.height
+
+            
+            # northeast
+            if (self.pos.x >= otherform.pos.x and 
+                self.pos.x <= otherform.pos.x + otherform.size.width -1 and 
+                self.pos.y + self.size.height >= otherform.pos.y +1 and 
+                self.pos.y <= otherform.pos.y):
+
+                if self.posbef.x >= otherform.pos.x + otherform.size.width:
+                    #print("Opax")
+                    self.pos.x = otherform.pos.x + otherform.size.width
+                elif self.posbef.y + self.size.height <= otherform.pos.y + self.poschange.y + 1:
+                    #print("Opay")
+                    self.pos.y = otherform.pos.y - self.size.height
+                    self.is_free_falling = False
+                
+            # northwest
+            if (self.pos.x <= otherform.pos.x and 
+                self.pos.x + self.size.width >= otherform.pos.x +1 and 
+                self.pos.y + self.size.height >= otherform.pos.y +1 and 
+                self.pos.y <= otherform.pos.y):
+
+                if self.posbef.x + self.size.width <= otherform.pos.x:
+                    #print("Opax")
+                    self.pos.x = otherform.pos.x - otherform.size.width
+                elif self.posbef.y + self.size.height <= otherform.pos.y + self.poschange.y + 1:
+                    #print("Opay")
+                    self.pos.y = otherform.pos.y - self.size.height
+                    self.is_free_falling = False
            
 
 pygame.init()
@@ -60,83 +133,6 @@ def draw_block(block: FormData):
     if CONFIG.SHOW_INFO_TEXT:
         message_display(block.name, 12, block.center.x, block.center.y - 15)
         message_display("x:{} y:{}".format(block.center.x, block.center.y), 12, block.center.x, block.center.y)
-
-def detect_border_collision(block: FormData):
-
-    display_x_boundary = CONFIG.DISPLAY_WIDTH - block.size.width
-    display_y_boundary = CONFIG.DISPLAY_HEIGHT - block.size.height
-
-    if block.pos.x > display_x_boundary:
-        block.pos.x = display_x_boundary
-    elif block.pos.x < 0:
-        block.pos.x = 0
-
-    if block.pos.y > display_y_boundary:            
-        block.pos.y = display_y_boundary
-        block.is_free_falling = False
-    elif block.pos.y < 0:
-        block.pos.y = 0
-
-    return block
-
-def detect_collision(block: FormData, otherblock: FormData):
-    # southeast
-    if (block.pos.x >= otherblock.pos.x and 
-        block.pos.x <= otherblock.pos.x + otherblock.size.width -1 and 
-        block.pos.y >= otherblock.pos.y and 
-        block.pos.y <= otherblock.pos.y + otherblock.size.height -1):
-
-        if block.posbef.x >= otherblock.pos.x + otherblock.size.width:
-            #print("Opax")
-            block.pos.x = otherblock.pos.x + otherblock.size.width
-        elif block.posbef.y >= otherblock.pos.y + otherblock.size.height:
-            #print("Opay")
-            block.pos.y = otherblock.pos.y + otherblock.size.height
-    
-    # southwest
-    if (block.pos.x <= otherblock.pos.x and 
-        block.pos.x + block.size.width >= otherblock.pos.x +1 and 
-        block.pos.y >= otherblock.pos.y and 
-        block.pos.y <= otherblock.pos.y + otherblock.size.height -1):
-
-        if block.posbef.x + block.size.width <= otherblock.pos.x:
-            #print("Opax")
-            block.pos.x = otherblock.pos.x - otherblock.size.width
-        elif block.posbef.y >= otherblock.pos.y + otherblock.size.height:
-            #print("Opay")
-            block.pos.y = otherblock.pos.y + otherblock.size.height
-
-    
-    # northeast
-    if (block.pos.x >= otherblock.pos.x and 
-        block.pos.x <= otherblock.pos.x + otherblock.size.width -1 and 
-        block.pos.y + block.size.height >= otherblock.pos.y +1 and 
-        block.pos.y <= otherblock.pos.y):
-
-        if block.posbef.x >= otherblock.pos.x + otherblock.size.width:
-            #print("Opax")
-            block.pos.x = otherblock.pos.x + otherblock.size.width
-        elif block.posbef.y + block.size.height <= otherblock.pos.y + block.poschange.y + 1:
-            #print("Opay")
-            block.pos.y = otherblock.pos.y - block.size.height
-            block.is_free_falling = False
-        
-    # northwest
-    if (block.pos.x <= otherblock.pos.x and 
-        block.pos.x + block.size.width >= otherblock.pos.x +1 and 
-        block.pos.y + block.size.height >= otherblock.pos.y +1 and 
-        block.pos.y <= otherblock.pos.y):
-
-        if block.posbef.x + block.size.width <= otherblock.pos.x:
-            #print("Opax")
-            block.pos.x = otherblock.pos.x - otherblock.size.width
-        elif block.posbef.y + block.size.height <= otherblock.pos.y + block.poschange.y + 1:
-            #print("Opay")
-            block.pos.y = otherblock.pos.y - block.size.height
-            block.is_free_falling = False
-
-    return block
-    
 
 def game_loop():
     gameExit = False
@@ -189,7 +185,8 @@ def game_loop():
         main_block.posbef = main_block.pos
         main_block.pos = FormDataPosition(main_block.pos.x + main_block.poschange.x, main_block.pos.y + main_block.poschange.y)
 
-        main_block = detect_border_collision(main_block)
+        #main_block = detect_border_collision(main_block)
+        main_block.detect_collision()
 
         main_block.center = FormDataPosition(round(main_block.pos.x + main_block.size.width / 2), round(main_block.pos.y + main_block.size.height / 2))
         main_block.centersum = main_block.center.x + main_block.center.y
@@ -204,8 +201,10 @@ def game_loop():
                 
                 form.pos.y += form.poschange.y
 
-                form = detect_border_collision(form)
-                main_block = detect_collision(main_block, form)
+                #form = detect_border_collision(form)
+                #main_block = detect_collision(main_block, form)
+                form.detect_collision()
+                main_block.detect_collision(form)
                 
                 draw_block(form)
 
