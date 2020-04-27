@@ -25,7 +25,7 @@ class FormData:
         self.posbef = FormDataPosition(pos.x, pos.y)
         self.poschange = FormDataPosition(0, 0)
         self.size = size
-        self.center = pos.x + size.width / 2, pos.y + size.height / 2
+        self.center = FormDataPosition(pos.x + size.width / 2, pos.y + size.height / 2)
         self.color = color
         self.is_free_falling = True
     
@@ -199,23 +199,23 @@ def game_loop():
                     
                     form.pos.y += form.poschange.y
 
-                    form.detect_collision()
+                    #form.detect_collision()
 
-                    form.center = FormDataPosition(round(form.pos.x + form.size.width / 2), round(form.pos.y + form.size.height / 2))
+                    form.center = FormDataPosition(form.pos.x + form.size.width / 2, form.pos.y + form.size.height / 2)
                     
-                    poslist = [([i.pos.x, i.pos.y]) for i in other_forms if i.name != form.name]
+                    poslist = [([i.center.x, i.center.y]) for i in other_forms if i.name != form.name]
                     #for i in other_forms:
                     #    if i.name != form.name:
                     #        poslist.append([i.pos.x, i.pos.y])
 
                     tree = spatial.KDTree(poslist)
 
-                    closest_forms_idx = [poslist[i] for i in tree.query([form.pos.x, form.pos.y], 4)[1]]
+                    closest_forms_idx = [poslist[i] for i in tree.query([form.center.x, form.center.y], 4)[1]]
 
                     closest_forms = []
                     for otherform in other_forms:
                         for idx in closest_forms_idx:
-                            if otherform.pos.x == idx[0] and otherform.pos.y == idx[1]:
+                            if otherform.center.x == idx[0] and otherform.center.y == idx[1]:
                                 closest_forms.append(otherform)
                     
                     """
