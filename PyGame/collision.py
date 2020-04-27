@@ -2,6 +2,7 @@ import pygame
 import time
 import random
 from collision_config import DefaultConfig
+from scipy import spatial
 
 CONFIG = DefaultConfig()
 
@@ -26,7 +27,6 @@ class FormData:
         self.size = size
         self.center = pos.x + size.width / 2, pos.y + size.height / 2
         self.color = color
-        self.centersum = center.x + center.y
         self.is_free_falling = True
     
     def detect_collision(self, otherform=False):
@@ -78,9 +78,11 @@ class FormData:
 
                 if self.posbef.x >= otherform.pos.x + otherform.size.width:
                     self.pos.x = otherform.pos.x + otherform.size.width
-                elif self.posbef.y + self.size.height <= otherform.pos.y + self.poschange.y + 1:
+                elif self.posbef.y + self.size.height <= otherform.pos.y + 1:
                     self.pos.y = otherform.pos.y - self.size.height
                     self.is_free_falling = False
+                    #print ("{} - {}".format(self.name, self.pos.y + self.size.height))
+                    #print ("{} - {}".format(otherform.name, otherform.pos.y))
                 
             # northwest
             if (self.pos.x <= otherform.pos.x and 
@@ -90,9 +92,11 @@ class FormData:
 
                 if self.posbef.x + self.size.width <= otherform.pos.x:
                     self.pos.x = otherform.pos.x - otherform.size.width
-                elif self.posbef.y + self.size.height <= otherform.pos.y + self.poschange.y + 1:
+                elif self.posbef.y + self.size.height <= otherform.pos.y + 1:
                     self.pos.y = otherform.pos.y - self.size.height
                     self.is_free_falling = False
+                    #print ("{} - {}".format(self.name, self.pos.y + self.size.height))
+                    #print ("{} - {}".format(otherform.name, otherform.pos.y))
            
 
 pygame.init()
@@ -124,10 +128,11 @@ def draw_block(block: FormData):
 
     if CONFIG.SHOW_INFO_TEXT:
         message_display(block.name, 12, block.center.x, block.center.y - 15)
-        message_display("x:{} y:{}".format(block.center.x, block.center.y), 12, block.center.x, block.center.y)
+        #message_display("x:{} y:{}".format(block.center.x, block.center.y), 12, block.center.x, block.center.y)
 
 def game_loop():
     gameExit = False
+    Paused = False
 
     main_block = FormData(
         "main_block", 
@@ -152,6 +157,12 @@ def game_loop():
             if event.type == pygame.QUIT:
                 gameExit = True
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    if Paused:
+                        Paused = False
+                    else:
+                        Paused = True
+                        print("Paused")
                 if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     main_block.poschange.x = -CONFIG.MOVE_SPEED
                 elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
@@ -159,7 +170,7 @@ def game_loop():
                 elif event.key == pygame.K_UP or event.key == pygame.K_w:
                     main_block.poschange.y = -CONFIG.MOVE_SPEED
                 elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
-                    main_block.poschange.y = CONFIG.MOVE_SPEED
+                    main_block.poschange.y = CONFIG.MOVE_SPEED                
             if event.type == pygame.KEYUP:
                 main_block.is_free_falling = True
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_a or event.key == pygame.K_d:
@@ -168,45 +179,69 @@ def game_loop():
                     main_block.poschange.y = 0
 
         #print(event)
-        
-        gameDisplay.fill(white)        
 
-        if CONFIG.GRAVITY_ON and main_block.is_free_falling:
-            main_block.poschange.y += CONFIG.GRAVITY_ACCEL / CONFIG.CLOCK_TICKS
+        if not Paused:
+        
+            gameDisplay.fill(white)     
+
+            if CONFIG.GRAVITY_ON and main_block.is_free_falling:
+                main_block.poschange.y += CONFIG.GRAVITY_ACCEL / CONFIG.CLOCK_TICKS
+                
+            main_block.posbef = main_block.pos
+            main_block.pos = FormDataPosition(main_block.pos.x + main_block.poschange.x, main_block.pos.y + main_block.poschange.y)
+
+            main_block.center = FormDataPosition(round(main_block.pos.x + main_block.size.width / 2), round(main_block.pos.y + main_block.size.height / 2))  
+
+            if other_forms:
+                for form in other_forms:
+                    if CONFIG.GRAVITY_ON and form.is_free_falling:
+                        form.poschange.y += CONFIG.GRAVITY_ACCEL / CONFIG.CLOCK_TICKS
+                    
+                    form.pos.y += form.poschange.y
+
+                    form.detect_collision()
+
+                    form.center = FormDataPosition(round(form.pos.x + form.size.width / 2), round(form.pos.y + form.size.height / 2))
+                    
+                    poslist = [([i.pos.x, i.pos.y]) for i in other_forms if i.name != form.name]
+                    #for i in other_forms:
+                    #    if i.name != form.name:
+                    #        poslist.append([i.pos.x, i.pos.y])
+
+                    tree = spatial.KDTree(poslist)
+
+                    closest_forms_idx = [poslist[i] for i in tree.query([form.pos.x, form.pos.y], 4)[1]]
+
+                    closest_forms = []
+                    for otherform in other_forms:
+                        for idx in closest_forms_idx:
+                            if otherform.pos.x == idx[0] and otherform.pos.y == idx[1]:
+                                closest_forms.append(otherform)
+                    
+                    """
+                    closest_forms = [
+                        x for x in other_forms 
+                        if  x.centersum == (min(centersumlist, key=lambda x:abs(x-form.centersum))) and
+                            x.pos.y == (min(posylist, key=lambda x:abs(x-form.pos.y)))                      
+                        ]
+                    """
+
+                    [form.detect_collision(otherform) for otherform in closest_forms]
+                    #[print("{} closest: {}".format(form.name, closest_form.name)) for closest_form in closest_forms]
+                    #form.detect_collision(closest_form)
+
+                    main_block.detect_collision(form)
+                    
+                    draw_block(form)
+
+            draw_block(main_block)
             
-        main_block.posbef = main_block.pos
-        main_block.pos = FormDataPosition(main_block.pos.x + main_block.poschange.x, main_block.pos.y + main_block.poschange.y)
+            pygame.display.update()        
+            clock.tick(CONFIG.CLOCK_TICKS)
 
-        #main_block = detect_border_collision(main_block)
-        main_block.detect_collision()
-
-        main_block.center = FormDataPosition(round(main_block.pos.x + main_block.size.width / 2), round(main_block.pos.y + main_block.size.height / 2))
-        main_block.centersum = main_block.center.x + main_block.center.y
-
-        if other_forms:
-            for form in other_forms:
-                form.center = FormDataPosition(round(form.pos.x + form.size.width / 2), round(form.pos.y + form.size.height / 2))
-                form.centersum = form.center.x + form.center.y
-
-                if CONFIG.GRAVITY_ON and form.is_free_falling:
-                    form.poschange.y += CONFIG.GRAVITY_ACCEL / CONFIG.CLOCK_TICKS
-                
-                form.pos.y += form.poschange.y
-
-                #form = detect_border_collision(form)
-                #main_block = detect_collision(main_block, form)
-                form.detect_collision()
-                main_block.detect_collision(form)
-                
-                draw_block(form)
-
-        draw_block(main_block)
-        
-        pygame.display.update()        
-        clock.tick(CONFIG.CLOCK_TICKS)
-
-        print(clock.get_rawtime()) 
-        print("--")        
+            print(clock.get_rawtime()) 
+            print("--")
+              
 
 game_loop()
 pygame.quit()
