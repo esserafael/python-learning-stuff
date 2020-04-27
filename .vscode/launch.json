@@ -8,6 +8,7 @@
             "name": "Python: Arquivo Atual",
             "type": "python",
             "request": "launch",
+            "pythonPath": "C:\\Users\\Feustel\\Documents\\GitHub\\PythonStuff\\PyGame\\.venv\\Scripts\\python.exe",
             "program": "${file}",
             "console": "integratedTerminal"
         }
