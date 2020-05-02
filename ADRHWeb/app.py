@@ -1,4 +1,6 @@
+from _version import __version__
 import os
+import base64
 import uuid
 import requests
 from flask import Flask, render_template, session, request, redirect, url_for, flash
@@ -16,11 +18,29 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app_config.ALLOWED_EXTENSIONS
 
+def get_graph_data(endpoint):
+    token = _get_token_from_cache(app_config.SCOPE)
+    if not token:
+        return redirect(url_for("login"))
+    graph_data = requests.get(  # Use token to call downstream service
+        endpoint,
+        headers={'Authorization': 'Bearer ' + token['access_token']},
+        )
+    return graph_data
+
+
 @app.route("/")
 def index():
     if not session.get("user"):
         return redirect(url_for("login"))
-    return render_template(app_config.PAGE_WRAPPER, content="index.html", user=session["user"], version=msal.__version__)
+    return render_template(
+        app_config.PAGE_WRAPPER, 
+        content="index.html", 
+        user=session["user"], 
+        user_basic_data=(get_graph_data("https://graph.microsoft.com/v1.0/me/")).json(),
+        user_profile_pic=(base64.b64encode(get_graph_data("https://graph.microsoft.com/v1.0/me/photo/$value")._content)).decode(),
+        version=__version__
+        )
 
 @app.route("/login")
 def login():
@@ -28,7 +48,11 @@ def login():
     # Technically we could use empty list [] as scopes to do just sign in,
     # here we choose to also collect end user consent upfront
     auth_url = _build_auth_url(scopes=app_config.SCOPE, state=session["state"])
-    return render_template("login.html", auth_url=auth_url, version=msal.__version__)
+    return render_template(
+        "login.html",
+        auth_url=auth_url,
+        version=__version__
+        )
 
 @app.route(app_config.REDIRECT_PATH)  # Its absolute URL must match your app's redirect_uri set in AAD
 def authorized():
@@ -61,7 +85,12 @@ def create():
     token = _get_token_from_cache(app_config.SCOPE)
     if not token:
         return redirect(url_for("login"))
-    return render_template(app_config.PAGE_WRAPPER, content="create.html", user=session["user"], version=msal.__version__)
+    return render_template(
+        app_config.PAGE_WRAPPER,
+        content="create.html",
+        user=session["user"],
+        version=__version__
+        )
 
 @app.route("/create/save")
 def create_save():
@@ -69,7 +98,12 @@ def create_save():
     if not token:
         return redirect(url_for("login"))
     if True:
-        return render_template('save.html', result="Conta criada com sucesso!", user=session["user"], version=msal.__version__)
+        return render_template(
+            'save.html',
+            result="Conta criada com sucesso!",
+            user=session["user"],
+            version=__version__
+            )
 
 @app.route("/upload", methods=['GET', 'POST'])
 def upload():
@@ -92,12 +126,17 @@ def upload():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            filename_withid = "{}__email__{}.{}".format(filename.rsplit('.', 1)[0].lower(), session["user"].get("preferred_username"), filename.rsplit('.', 1)[1].lower()) 
+            filename_withid = "{}__email__{}.{}".format(filename.rsplit('.', 1)[0].lower(), session["user"].get("preferred_username"), filename.rsplit('.', 1)[1].lower())
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename_withid))
-            
-            return render_template(app_config.PAGE_WRAPPER, content="save.html", result="Arquivo {} enviado com sucesso!".format(filename), filename=filename, user=session["user"], version=msal.__version__)
+            return render_template(
+                app_config.PAGE_WRAPPER,
+                content="save.html",
+                result="Arquivo {} enviado com sucesso!".format(filename),
+                filename=filename, user=session["user"],
+                version=__version__
+                )
 
-    return render_template(app_config.PAGE_WRAPPER, content="upload.html", user=session["user"], version=msal.__version__)
+    return render_template(app_config.PAGE_WRAPPER, content="upload.html", user=session["user"], version=__version__)
 
 
 @app.route("/graphcall")
@@ -105,10 +144,7 @@ def graphcall():
     token = _get_token_from_cache(app_config.SCOPE)
     if not token:
         return redirect(url_for("login"))
-    graph_data = requests.get(  # Use token to call downstream service
-        app_config.ENDPOINT,
-        headers={'Authorization': 'Bearer ' + token['access_token']},
-        ).json()
+    graph_data = get_graph_data("https://graph.microsoft.com/v1.0/me/").json()
     return render_template('display.html', result=graph_data)
 
 def _load_cache():
