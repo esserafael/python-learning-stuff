@@ -26,7 +26,7 @@
     }
 
     a:hover {
-        text-decoration: underline;
+        text-decoration: none;
     }
 
     .atitle:hover {
@@ -141,7 +141,10 @@
         -webkit-box-shadow:0 2px 6px rgba(0,0,0,0.2);
         -moz-box-shadow:0 2px 6px rgba(0,0,0,0.2);
         box-shadow:0 2px 6px rgba(0,0,0,0.2);
-        min-width:320px;min-height:338px;
+        -webkit-border-radius: 8px;
+        border-radius: 8px;
+        min-width:320px;
+        min-height:338px;
         overflow:hidden
     }
 
@@ -180,6 +183,56 @@
             float: right;
             font-size: small;
         }
+    }
+
+    /* Index Page */
+    .tiles {
+        padding: 20px;
+        height: 180px;
+        display: flex;
+        flex-wrap: wrap;
+        /*background-color: #1fb40b;*/
+    }
+
+    .animated-tile {
+        padding: 5px;
+        position: relative;
+        -webkit-animation: all 50ms
+            cubic-bezier(.1,.9,.2,1);
+        animation: all 50ms
+            cubic-bezier(.1,.9,.2,1);
+        position: relative;
+        float: left;
+        display: inline-block;
+        transition: outline .125s
+            ease-in-out,transform 0.125s
+            ease-in-out,-webkit-transform .125s
+            ease-in-out;
+        transition: background-color .1s
+            ease-in, 
+                    height .1s
+            ease-in-out;
+        height: 130px;
+        width: 130px;
+        /*background-color:#fd0*/
+    }
+
+    .animated-tile:hover {
+        height: 140px;
+        -webkit-box-shadow:0 4px 12px rgba(0,0,0,0.2);
+        -moz-box-shadow:0 4px 12px rgba(0,0,0,0.2);
+        box-shadow:0 4px 12px rgba(0,0,0,0.2);
+        /*background-color:#1fb40b*/
+    }    
+
+    .tile-name{
+        position: absolute;
+        bottom: 0px;
+        padding: 5%;
+        width: 90%;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     /* Add padding to containers */
@@ -223,9 +276,9 @@
       font-family: 'NeoSansStd-Regular', Helvetica, Arial, sans-serif;
       font-size: x-large;
       background-color: #1fb40b;
-      display: block; 
-      margin: 0 auto;
       color: white;
+      display: block; 
+      margin: 0 auto;      
       padding: 16px 20px;
       border: none;
       cursor: pointer;
