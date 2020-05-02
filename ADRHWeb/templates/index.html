@@ -1,0 +1,9 @@
+<h2>Bem-vindo, {{ user.get("name") }}!</h2>
+<li><a href="/create">Criar Nova Conta</a></li>
+<li><a href="/upload">Criar Novas Contas em Lote</a></li>
+
+{% if config.get("ENDPOINT") %}
+  <!--<li><a href='/graphcall'>Call Microsoft Graph API</a></li>-->
+{% endif %}
+
+<li><a href="/logout">Logout</a></li>
