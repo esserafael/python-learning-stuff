@@ -34,11 +34,10 @@ def index():
     if not session.get("user"):
         return redirect(url_for("login"))
     return render_template(
-        app_config.PAGE_WRAPPER, 
-        content="index.html", 
-        user=session["user"], 
-        user_basic_data=(get_graph_data("https://graph.microsoft.com/v1.0/me/")).json(),
-        user_profile_pic=(base64.b64encode(get_graph_data("https://graph.microsoft.com/v1.0/me/photo/$value")._content)).decode(),
+        app_config.PAGE_WRAPPER,
+        content="index.html",
+        user=session["user"],
+        user_basic_data=session["me_data"],
         version=__version__
         )
 
@@ -56,21 +55,30 @@ def login():
 
 @app.route(app_config.REDIRECT_PATH)  # Its absolute URL must match your app's redirect_uri set in AAD
 def authorized():
+    #print("Request State: {}".format(request.args.get('state')))
+    #print("Session: {}".format(session))
     if request.args.get('state') != session.get("state"):
         return redirect(url_for("index"))  # No-OP. Goes back to Index page
     if "error" in request.args:  # Authentication/Authorization failure
         return render_template("autherror.html", result=request.args)
     if request.args.get('code'):
         cache = _load_cache()
+        #print("Request Code: {}".format(request.args.get('code')))
+        #print("Cache: {}".format(cache))
         result = _build_msal_app(cache=cache).acquire_token_by_authorization_code(
             request.args['code'],
             scopes=app_config.SCOPE,  # Misspelled scope would cause an HTTP 400 error here
             redirect_uri=url_for("authorized", _external=True))
             #redirect_uri=url_for("authorized", _external=True, _scheme="https"))
         if "error" in result:
-            return render_template("auth_error.html", result=result)
+            return render_template("autherror.html", result=result)
+        #print("Result: {}".format(result))
         session["user"] = result.get("id_token_claims")
+        print("Session 2: {}".format(session["user"]))
         _save_cache(cache)
+    me_data = get_graph_data("https://graph.microsoft.com/v1.0/me/").json()
+    me_data["me_pic"] = (base64.b64encode(get_graph_data("https://graph.microsoft.com/v1.0/me/photo/$value")._content)).decode()
+    session["me_data"] = me_data
     return redirect(url_for("index"))
 
 @app.route("/logout")
@@ -88,7 +96,7 @@ def create():
     return render_template(
         app_config.PAGE_WRAPPER,
         content="create.html",
-        user=session["user"],
+        user_basic_data=session["me_data"],
         version=__version__
         )
 
@@ -101,7 +109,7 @@ def create_save():
         return render_template(
             'save.html',
             result="Conta criada com sucesso!",
-            user=session["user"],
+            user_basic_data=session["me_data"],
             version=__version__
             )
 
@@ -132,11 +140,15 @@ def upload():
                 app_config.PAGE_WRAPPER,
                 content="save.html",
                 result="Arquivo {} enviado com sucesso!".format(filename),
-                filename=filename, user=session["user"],
+                filename=filename, 
+                user_basic_data=session["me_data"],
                 version=__version__
                 )
-
-    return render_template(app_config.PAGE_WRAPPER, content="upload.html", user=session["user"], version=__version__)
+    return render_template(
+        app_config.PAGE_WRAPPER,
+        content="upload.html",
+        user_basic_data=session["me_data"],
+        version=__version__)
 
 
 @app.route("/graphcall")
